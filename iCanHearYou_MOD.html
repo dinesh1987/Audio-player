@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+	<head>
+		<title>iCanHearYou</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<style type="text/css" media="screen">
+		html, body { height:100%; background-color: #ffffff;}
+		body { margin:0; padding:0; overflow:hidden; }
+		#flashContent { width:100%; height:100%; }
+		</style>
+		<script type="text/javascript">
+
+		    var fObj; //flash object
+		    var readyToSnoop = false;
+		    var soundRecording; //will hold sound data as floating point byte array
+		    var soundPosition = 0; //will hold the paused position of sound
+
+		    var recLength = 90000; //milliseconds of recording
+		    var micRecordingDelay = 0; ////milliseconds before recording begins
+		    var micSilenceLevel = 0 //baseline sound [0 to 100] - minimum sound activity that mic can detect (used mainly for voice activated recording)
+		    var micGain = 50; //volume gain [0 to 100]
+		    var micSampleRate = 11; //sample rate in kHz [5, 8, 11, 22, 44]
+
+
+		    //after init, flash calls this to intimate that "js" can call "as"
+		    function flashInitialized()
+		    {
+			  readyToSnoop = true;
+		      var isInternetExplorer = navigator.appName.indexOf("Microsoft") != -1;
+
+		      // get flash object
+		      //fObj = isInternetExplorer ? document.all.iCanHearYou : document.iCanHearYou;
+		      fObj = isInternetExplorer ? document.all.iCanHearYou : document.getElementById("iCanHearYou");
+
+		    }
+
+			function MicrophoneStatus(respCode)
+			{
+				if(respCode == "ALLOWED")
+				{
+
+				}
+
+				if(respCode == "DENIED")
+								{
+
+				}
+
+			}
+
+
+		    function startRecording()
+		    {
+		    	if(readyToSnoop)
+		    	{
+		    		fObj.fRecord(recLength, micRecordingDelay, micSilenceLevel, micGain, micSampleRate);
+		    		//document.getElementById("btnRecord").disabled = true;
+		    	}
+		    }
+
+		    function RecordingOver(soundBytes)
+		    {
+
+		    	soundRecording = soundBytes;
+		    	soundPosition = 0;
+		    	document.getElementById("btnPlay").disabled = false;
+		    	document.getElementById("btnRecord").disabled = false;
+		    	document.getElementById("base64").value = soundBytes;
+
+		    }
+
+		    function Paused(position)
+		    {
+				soundPosition = position;
+				//alert(soundPosition);
+		    }
+
+			function PlayComplete()
+			{
+				soundPosition = 0;
+				//alert(soundPosition);
+		    }
+
+		    function startPlaying()
+		    {
+				if(readyToSnoop)
+				{
+					fObj.fPlay(soundRecording, soundPosition);
+				}
+		    }
+
+		    function Stop()
+		    {
+		    	if(readyToSnoop)
+		    	{
+		    		fObj.fStopRecording();
+		    	}
+		    }
+
+		    function Pause()
+		    {
+		    	if(readyToSnoop)
+				{
+					fObj.fPause();
+		    	}
+		    }
+
+			function RecordingStarted()
+			{
+				alert('started');
+		    }
+
+		    function ErrorResponder(ErrCode)
+		    {
+		    	//control needs to return back to flash ASAP or we can get a shockwave plugin crash.
+		    	setTimeout(ErrorWorker, 1000, ErrCode);
+
+		    }
+
+		    function ErrorWorker(ErrCode)
+		    {
+		    	if(ErrCode == "NO_MIC_AVAIL")
+		    		alert("Microphone is not available for Recording. Please attach a listening device.");
+		    	else
+		    		alert(ErrCode);
+		    }
+
+    </script>
+	</head>
+	<body>
+		<div>
+			<button id="btnPlay" onClick="startPlaying()" disabled="true">Play</button>
+			<button id="btnPause" onClick="Pause()" >Pause</button>
+			<button id="btnRecord" onClick="startRecording()">Record</button>
+			<button id="btnStop" onClick="Stop()">Stop</button>
+
+			<textarea id="base64"></textarea>
+		<div>
+		<div id="flashContent">
+
+				<object type="application/x-shockwave-flash" data="iCanHearYou.swf" width="215" height="138" id="iCanHearYou">
+					<param name="movie" value="iCanHearYou.swf" />
+					<param name="quality" value="high" />
+					<param name="bgcolor" value="#ffffff" />
+					<param name="play" value="true" />
+					<param name="loop" value="true" />
+					<param name="wmode" value="window" />
+					<param name="scale" value="showall" />
+					<param name="menu" value="true" />
+					<param name="devicefont" value="false" />
+					<param name="salign" value="" />
+					<param name="allowScriptAccess" value="always" />
+					<a href="http://www.adobe.com/go/getflash">
+						<img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" />
+					</a>
+				</object>
+		</div>
+	</body>
+</html>
